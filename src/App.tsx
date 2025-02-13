@@ -1,5 +1,6 @@
 import { FC } from "react";
 import { useWebSocket } from "./hooks/useWebSocket";
+import StockList from "./components/StockList/StockList";
 import "./App.css";
 
 const WEBSOCKET_URL = "ws://localhost:8080"; // We'll create this server next
@@ -15,7 +16,9 @@ const App: FC = () => {
           Status: {isConnected ? "Connected" : "Disconnected"}
         </div>
       </header>
-      <main className="app-main">{/* Components will be added here */}</main>
+      <main className="app-main">
+        <StockList />
+      </main>
     </div>
   );
 };

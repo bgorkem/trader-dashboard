@@ -1,5 +1,5 @@
 import { store } from "../store";
-import { setError, updateStock } from "../store/stocksSlice";
+import { setError, updateStock, addStocks } from "../store/stocksSlice";
 import { StockUpdate } from "../types/stock";
 
 type ConnectionChangeCallback = (connected: boolean) => void;
@@ -33,8 +33,15 @@ class WebSocketService {
 
     this.ws.onmessage = (event) => {
       try {
-        const data: StockUpdate = JSON.parse(event.data);
-        store.dispatch(updateStock(data));
+        const data = JSON.parse(event.data);
+
+        if (data.type === "INITIAL_DATA") {
+          store.dispatch(addStocks(data.stocks));
+        } else if (data.type === "STOCK_UPDATE") {
+          data.updates.forEach((update: StockUpdate) => {
+            store.dispatch(updateStock(update));
+          });
+        }
       } catch (error) {
         console.error("Error parsing WebSocket message:", error);
       }
