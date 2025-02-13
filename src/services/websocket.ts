@@ -2,11 +2,14 @@ import { store } from "../store";
 import { setError, updateStock } from "../store/stocksSlice";
 import { StockUpdate } from "../types/stock";
 
+type ConnectionChangeCallback = (connected: boolean) => void;
+
 class WebSocketService {
   private ws: WebSocket | null = null;
   private reconnectAttempts = 0;
   private readonly maxReconnectAttempts = 5;
   private readonly reconnectDelay = 3000; // 3 seconds
+  private connectionListeners: Set<ConnectionChangeCallback> = new Set();
 
   connect(url: string): void {
     try {
@@ -15,6 +18,7 @@ class WebSocketService {
     } catch (error) {
       console.error("WebSocket connection error:", error);
       store.dispatch(setError("Failed to connect to WebSocket server"));
+      this.notifyConnectionChange(false);
     }
   }
 
@@ -24,6 +28,7 @@ class WebSocketService {
     this.ws.onopen = () => {
       console.log("WebSocket connection established");
       this.reconnectAttempts = 0;
+      this.notifyConnectionChange(true);
     };
 
     this.ws.onmessage = (event) => {
@@ -37,12 +42,14 @@ class WebSocketService {
 
     this.ws.onclose = () => {
       console.log("WebSocket connection closed");
+      this.notifyConnectionChange(false);
       this.attemptReconnect();
     };
 
     this.ws.onerror = (error) => {
       console.error("WebSocket error:", error);
       store.dispatch(setError("WebSocket connection error"));
+      this.notifyConnectionChange(false);
     };
   }
 
@@ -67,11 +74,23 @@ class WebSocketService {
       this.ws.close();
       this.ws = null;
     }
+    this.notifyConnectionChange(false);
   }
 
-  // Method to check if WebSocket is connected
   isConnected(): boolean {
     return this.ws?.readyState === WebSocket.OPEN;
+  }
+
+  onConnectionChange(callback: ConnectionChangeCallback): void {
+    this.connectionListeners.add(callback);
+  }
+
+  offConnectionChange(callback: ConnectionChangeCallback): void {
+    this.connectionListeners.delete(callback);
+  }
+
+  private notifyConnectionChange(connected: boolean): void {
+    this.connectionListeners.forEach((listener) => listener(connected));
   }
 }
 
