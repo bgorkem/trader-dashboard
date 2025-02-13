@@ -34,14 +34,21 @@ const STOCK_SYMBOLS = [
 ];
 
 export function generateMockStocks(count: number): Stock[] {
-  return STOCK_SYMBOLS.slice(0, count).map((symbol) => ({
-    symbol,
-    price: generateRandomPrice(),
-    change: 0,
-    percentChange: 0,
-    volume: Math.floor(Math.random() * 1000000),
-    lastUpdated: new Date().toISOString(),
-  }));
+  return STOCK_SYMBOLS.slice(0, count).map((symbol) => {
+    const price = generateRandomPrice();
+    // Initialize with small random changes
+    const change = (Math.random() - 0.5) * 2; // Random change between -1 and 1
+    const percentChange = (change / price) * 100;
+
+    return {
+      symbol,
+      price,
+      change,
+      percentChange,
+      volume: Math.floor(Math.random() * 1000000),
+      lastUpdated: new Date().toISOString(),
+    };
+  });
 }
 
 export function updateStockPrices(stocks: Stock[]): Stock[] {
@@ -54,8 +61,8 @@ export function updateStockPrices(stocks: Stock[]): Stock[] {
     return {
       ...stock,
       price: newPrice,
-      change,
-      percentChange,
+      change, // Update the change value
+      percentChange, // Update the percent change value
       volume: stock.volume + Math.floor(Math.random() * 10000),
       lastUpdated: new Date().toISOString(),
     };

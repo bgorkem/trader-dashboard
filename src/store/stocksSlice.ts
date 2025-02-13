@@ -24,19 +24,18 @@ const stocksSlice = createSlice({
       state.error = action.payload;
     },
     updateStock: (state, action: PayloadAction<StockUpdate>) => {
-      const { symbol, price, timestamp } = action.payload;
+      const { symbol, price, change, percentChange, timestamp } =
+        action.payload;
       const currentStock = state.stocks[symbol];
 
       if (currentStock) {
-        const prevPrice = currentStock.price;
-        const change = price - prevPrice;
-        const percentChange = (change / prevPrice) * 100;
-
         state.stocks[symbol] = {
           ...currentStock,
           price,
-          change,
-          percentChange,
+          change: change ?? price - currentStock.price,
+          percentChange:
+            percentChange ??
+            ((price - currentStock.price) / currentStock.price) * 100,
           lastUpdated: timestamp,
         };
       }

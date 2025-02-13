@@ -36,6 +36,8 @@ setInterval(() => {
       const updates = stocks.map((stock) => ({
         symbol: stock.symbol,
         price: stock.price,
+        change: stock.change,
+        percentChange: stock.percentChange,
         timestamp: new Date().toISOString(),
       }));
 

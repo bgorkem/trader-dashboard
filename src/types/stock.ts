@@ -10,5 +10,7 @@ export interface Stock {
 export interface StockUpdate {
   symbol: string;
   price: number;
+  change: number;
+  percentChange: number;
   timestamp: string;
 }
